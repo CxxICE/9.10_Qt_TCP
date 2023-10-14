@@ -71,15 +71,15 @@ TCPserver::TCPserver(QObject *parent, uint16_t bindPort)
         incSocket = tcpServer->nextPendingConnection();
 
         connect(incSocket, &QTcpSocket::readyRead, this, &TCPserver::ReadyRead);
-        connect(incSocket, &QTcpSocket::disconnected, incSocket, [&]{
-
-            qDebug() << "Socket " <<  incSocket->socketDescriptor() << " disconnected!";
-            incSocket->deleteLater();
-            sockets.remove(sockets.indexOf(incSocket));
+		connect(incSocket, &QTcpSocket::disconnected, this, [&]{
+			QTcpSocket* delSocket = (QTcpSocket*)sender();
+			qDebug() << "Socket " <<  sockets.find(delSocket).value() << " disconnected!";
+			delSocket->deleteLater();
+			sockets.erase(sockets.find(delSocket));
 
         });
 
-        sockets.push_back(incSocket);
+		sockets.insert(incSocket, incSocket->socketDescriptor());
 
         qDebug() << "Socket " <<  incSocket->socketDescriptor() << " connected!";
 
